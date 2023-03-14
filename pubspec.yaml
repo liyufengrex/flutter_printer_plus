@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   path_provider: ^2.0.12
+  image: ^3.0.2
   isolates: ^3.0.3
   esc_utils: ^0.0.1
   tsc_utils: ^0.0.1

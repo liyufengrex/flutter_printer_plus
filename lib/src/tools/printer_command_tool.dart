@@ -1,11 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:esc_utils/src/commands.dart';
-import 'package:flutter_printer_plus/src/service/tsc_printer_service.dart';
+import 'package:flutter_printer_plus/flutter_printer_plus.dart';
 import 'package:print_image_generate_tool/print_image_generate_tool.dart';
-
 import 'image_tool.dart';
-import '../service/esc_printer_service.dart';
 
 abstract class PrinterCommandTool {
   /// 生成打印圖片指令
