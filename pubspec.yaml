@@ -1,6 +1,6 @@
 name: flutter_printer_plus
 description: flutter 端 【小票、标签】打印能力实现，直接将 flutter widget 转图像数据进行打印。
-version: 0.0.1+1
+version: 0.0.1+2
 homepage: https://github.com/liyufengrex/flutter_printer_plus.git
 
 environment:

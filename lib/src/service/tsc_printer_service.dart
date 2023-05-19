@@ -55,7 +55,10 @@ class TscPrinterService extends BasePrinterService {
     generator.addDirection(Direction.backWord);
     generator.addReference(2, 2);
     generator.addCls();
-    generator.addImage(targetImg);
+    generator.addImage(
+      targetImg,
+      needGrayscale: true,
+    );
     generator.addPrint(1);
     return generator.byte;
   }
