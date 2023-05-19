@@ -1,18 +1,20 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
-
 import 'base_conn.dart';
 
 class NetConn extends PrintBaseConn {
   final String address;
   Socket? _socket;
   bool _isConnect = false;
+  int? _sourcePort;
 
   NetConn(this.address);
 
   bool get connected => _isConnect;
 
-  // 断开重连
+  StreamSubscription? _socketSubscription;
+
   Future<bool> reset() async {
     try {
       await disconnect();
@@ -23,82 +25,132 @@ class NetConn extends PrintBaseConn {
     }
   }
 
-  // 连接
+  void _close() {
+    _isConnect = false;
+    _socket = null;
+    try {
+      _socketSubscription?.cancel();
+    } catch (e) {
+      //暂无处理
+    }
+    _socketSubscription = null;
+  }
+
   Future<bool> connect({
     int port = 9100,
     Duration? timeout = const Duration(seconds: 5),
+    bool canRetry = true,
     bool throwError = false,
   }) async {
     if (_socket != null && _isConnect) {
       return true;
     }
+    _close();
     try {
       _socket = await Socket.connect(
         address,
         port,
+        sourcePort: _sourcePort ?? 0,
         timeout: timeout,
       );
       _isConnect = true;
+      _sourcePort = _socket?.port;
+      _socketSubscription = _socket?.listen(
+        (event) {
+          //暂无处理
+        },
+        onDone: () {
+          _close();
+        },
+        onError: (e) {
+          _close();
+        },
+      );
     } catch (e) {
-      _isConnect = false;
-      if (throwError) {
-        rethrow;
+      _close();
+      if (canRetry) {
+        final isInUseException =
+            e.toString().contains('Address already in use');
+        if (isInUseException) {
+          //需要使用新的 sourcePort
+          _sourcePort = null;
+        }
+        return connect(
+          port: port,
+          timeout: timeout,
+          canRetry: false,
+          throwError: throwError,
+        );
+      } else {
+        if (throwError) {
+          rethrow;
+        }
       }
     }
     return _isConnect;
   }
 
-  // 断开连接
   Future<bool> disconnect() async {
+    if (_socket == null || !_isConnect) {
+      return true;
+    }
+    void onDisCon(
+      Completer completer,
+      bool result,
+    ) {
+      if (!completer.isCompleted) {
+        _close();
+        _sourcePort = null;
+        completer.complete(result);
+      }
+    }
+
+    final completer = Completer<bool>();
     try {
+      _socket?.done.then(
+        (value) {
+          onDisCon(completer, true);
+        },
+      );
       await _socket?.flush();
       await _socket?.close();
-    } catch (e) {
-      log('netConn disconnect error : ${e.toString()}');
-    }
-    _isConnect = false;
-    return !_isConnect;
-  }
-
-  Future<int> writeMultiBytes(
-    List<List<int>> data, {
-    bool isDisconnect = true,
-  }) async {
-    int writeCount = 0;
-    for (int index = 0; index < data.length; index++) {
-      final itemBytes = data[index];
-      final resultCount = await writeBytes(
-        itemBytes,
-        isDisconnect: isDisconnect,
+      Future.delayed(
+        const Duration(seconds: 2),
+        () {
+          onDisCon(completer, true);
+        },
       );
-      if (resultCount <= 0) {
-        throw Exception('Print transmission interrupted');
-      }
-      writeCount += resultCount;
+    } catch (e) {
+      log(
+        'netConn disconnect error : ${e.toString()}',
+      );
+      onDisCon(completer, false);
     }
-    return writeCount;
+    return completer.future;
   }
 
-  // 写入数据
   Future<int> writeBytes(
     List<int> data, {
-    bool isDisconnect = true,
+    bool isDisconnect = false,
   }) async {
     try {
       if (!_isConnect) {
-        await connect();
+        await connect(
+          throwError: true,
+        );
       }
-      if (!_isConnect) {
-        throw Exception('printer connect error ( ip: $address)');
+      if (!_isConnect || _socket == null) {
+        throw Exception('打印机连接异常( ip: $address)');
       }
-      _socket?.add(data);
+      _socket!.add(data);
+      await _socket!.flush();
       if (isDisconnect) {
         await disconnect();
       }
       return data.length;
     } catch (e) {
-      _isConnect = false;
-      return -1;
+      await disconnect();
+      rethrow;
     }
   }
 }
