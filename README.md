@@ -9,7 +9,7 @@ flutter 端 【小票、标签】打印能力实现，直接将 flutter widget �
 #### 1. 图像数据（Uint8List） 转 TSC 、ESC
 
 ###### 第一步：获取 Uint8List
-+ 方案一：通过 `print_image_generate_tool` 库，可将 widget 转 Uint8List
++ 方案一：使用 widget 绘制打印样式，通过 [print_image_generate_tool](https://github.com/liyufengrex/print_image_generate_tool) 库，将 widget 转 Uint8List
 + 方案二：通过 `path_provider` 库，将本地图片转 Uint8List
 
 ###### 第二步：转 TSC 、ESC
@@ -42,7 +42,14 @@ example 内提供获取局域网内可用打印机样例
         final conn = NetConn(ip);
         conn.writeMultiBytes(printData);
 ```
-#### 附注：
+
+附上使用该库实现的，小票、标签打印实体效果图：
+
+![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6bd714e181724eb9a385b428333f4635~tplv-k3u1fbpfcp-watermark.image?)
+
+![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b6254215af644854b073944733e3b7b0~tplv-k3u1fbpfcp-watermark.image?)
+
+### 附注：
 具体实现逻辑可参考 example ，建议使用者将上层进行封装（维护队列），打印图层生成成功后先将图像保存本地，等待上一个打印任务结束后再从队列中获取本地图片进行下一个打印任务，避免造成内存抖动。
 
 #### ：[flutter：小票标签打印](https://juejin.cn/post/7210688688921395237)
