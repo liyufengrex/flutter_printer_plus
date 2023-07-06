@@ -43,13 +43,13 @@ example 内提供获取局域网内可用打印机样例
         conn.writeMultiBytes(printData);
 ```
 
-附上使用该库实现的，小票、标签打印实体效果图：
+### 附注：
+具体实现逻辑可参考 example ，建议使用者将上层进行封装（维护队列），打印图层生成成功后先将图像保存本地，等待上一个打印任务结束后再从队列中获取本地图片进行下一个打印任务，避免造成内存抖动。
+
+#### 方案详细说明链接：[flutter：小票标签打印](https://juejin.cn/post/7210688688921395237)
+
+附上使用该库实现的，小票、标签打印实际效果图：
 
 ![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6bd714e181724eb9a385b428333f4635~tplv-k3u1fbpfcp-watermark.image?)
 
 ![image.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b6254215af644854b073944733e3b7b0~tplv-k3u1fbpfcp-watermark.image?)
-
-### 附注：
-具体实现逻辑可参考 example ，建议使用者将上层进行封装（维护队列），打印图层生成成功后先将图像保存本地，等待上一个打印任务结束后再从队列中获取本地图片进行下一个打印任务，避免造成内存抖动。
-
-#### ：[flutter：小票标签打印](https://juejin.cn/post/7210688688921395237)
