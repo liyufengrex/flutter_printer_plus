@@ -6,10 +6,12 @@ import 'package:path_provider/path_provider.dart';
 import 'log_tool.dart';
 
 abstract class ImageTool {
-
-  static Future<String> saveImage(Uint8List byteData) async {
+  static Future<String> saveImage(
+    Uint8List byteData, {
+    String suffix = 'png',
+  }) async {
     final directory = (await getTemporaryDirectory()).path;
-    String path = '$directory/${DateTime.now().millisecondsSinceEpoch}.png';
+    String path = '$directory/${DateTime.now().millisecondsSinceEpoch}.$suffix';
     final imgFile = File(path);
     try {
       await imgFile.writeAsBytes(byteData);

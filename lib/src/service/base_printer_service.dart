@@ -7,25 +7,34 @@ abstract class BasePrinterService {
 }
 
 abstract class ImageDecodeTool {
-  static Future<img.Image> cropImage(
+
+  static img.Image createImageWithUni8List(
+    Uint8List imgData,
+  ) {
+    return img.decodeImage(imgData)!;
+  }
+
+  static img.Image createImageWithARGB(
     Uint8List imgData, {
-    int requireCutWidth = 0,
-  }) async {
-    final img.Image origin = img.decodeImage(imgData)!;
-    int targetWidth = origin.width;
-    int targetHeight = origin.height;
-    if (requireCutWidth < origin.width && requireCutWidth > 0) {
-      targetWidth = requireCutWidth;
-    }
-    //切白邊
-    final img.Image crop = img.copyCrop(
-      origin,
-      0,
-      0,
-      targetWidth,
-      targetHeight,
+    required int widthPx,
+    required int heightPx,
+  }) {
+    return img.Image.fromBytes(
+      widthPx,
+      heightPx,
+      imgData,
     );
-    return crop;
+  }
+
+  static img.Image createImageWithARGB0(List<dynamic> params) {
+    final imgData = params[0];
+    final widthPx = params[1];
+    final heightPx = params[2];
+    return img.Image.fromBytes(
+      widthPx,
+      heightPx,
+      imgData,
+    );
   }
 
   static Future<img.Image> resizeImage(
@@ -43,26 +52,41 @@ abstract class ImageDecodeTool {
   static Future<List<img.Image>> decodeImage0(List<dynamic> params) async {
     Uint8List imgData = params[0];
     int limitSize = params[1];
+    final img.Image image = createImageWithUni8List(imgData);
     return decodeImage(
-      imgData,
+      image,
+      imgSizeLimit: limitSize,
+    );
+  }
+
+  //这个效率更高，因为 image 库 解析 unit8List 非常慢
+  static Future<List<img.Image>> decodeARGB0(List<dynamic> params) async {
+    Uint8List argbData = params[0];
+    int widthPx = params[1];
+    int heightPx = params[2];
+    int limitSize = params[3];
+    final img.Image image = createImageWithARGB(
+      argbData,
+      widthPx: widthPx,
+      heightPx: heightPx,
+    );
+    return decodeImage(
+      image,
       imgSizeLimit: limitSize,
     );
   }
 
   static Future<List<img.Image>> decodeImage(
-    Uint8List imgData, {
+    img.Image originImage, {
     int imgSizeLimit = 550 * 1000,
   }) async {
-    final img.Image crop = await cropImage(
-      imgData,
-    );
-    final cropWidth = crop.width;
-    img.Image targetImg = crop;
-    if (cropWidth % 8 != 0) {
+    final imageWidth = originImage.width;
+    img.Image targetImg = originImage;
+    if (imageWidth % 8 != 0) {
       targetImg = await resizeImage(
-        crop,
-        targetWidth: cropWidth ~/ 8 * 8,
-        targetHeight: crop.height,
+        originImage,
+        targetWidth: imageWidth ~/ 8 * 8,
+        targetHeight: originImage.height,
       );
     }
     final targetWidth = targetImg.width;
@@ -91,7 +115,7 @@ abstract class ImageDecodeTool {
 
       if (lastItemHeight > 0) {
         final lastItem = img.copyCrop(
-          crop,
+          originImage,
           0,
           splitItemHeight * splitCount,
           targetWidth,
@@ -101,7 +125,7 @@ abstract class ImageDecodeTool {
         LogTool.log('切图 * 1 份 width（$targetWidth） height（$lastItemHeight）');
       }
     } else {
-      result.add(crop);
+      result.add(originImage);
       LogTool.log('esc 无需切割 width（$targetWidth） height（$targetHeight）');
     }
     return result;

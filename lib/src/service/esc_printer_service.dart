@@ -7,26 +7,45 @@ import 'base_printer_service.dart';
 import 'isolate/isolate_balance.dart';
 
 class ESCPrinterService extends BasePrinterService {
-  final Uint8List imgData;
+  final Uint8List? imgData;
   final int imgSizeLimit; //长图需要进行切割
+  final int? argbWidthPx; // imgData 类型为 ARGB Uint8List 时，需要传入 图像的像素宽度
+  final int? argbHeightPx; // imgData 类型为 ARGB Uint8List 时，需要传入 图像的像素高度
 
   ESCPrinterService(
     this.imgData, {
     required this.imgSizeLimit,
+    this.argbWidthPx,
+    this.argbHeightPx,
   });
+
+  Future decodeImageFunction() {
+    if (argbHeightPx != null && argbWidthPx != null) {
+      return ISOManager.loadBalanceFuture<List<img.Image>, List<dynamic>>(
+        ImageDecodeTool.decodeARGB0,
+        [
+          imgData,
+          argbWidthPx,
+          argbHeightPx,
+          imgSizeLimit,
+        ],
+      );
+    } else {
+      return ISOManager.loadBalanceFuture<List<img.Image>, List<dynamic>>(
+        ImageDecodeTool.decodeImage0,
+        [
+          imgData,
+          imgSizeLimit,
+        ],
+      );
+    }
+  }
 
   @override
   Future<List<List<int>>> getBytes() async {
     final cmd = <List<int>>[];
     final startTime = DateTime.now();
-    final images =
-        await ISOManager.loadBalanceFuture<List<img.Image>, List<dynamic>>(
-      ImageDecodeTool.decodeImage0,
-      [
-        imgData,
-        imgSizeLimit,
-      ],
-    );
+    final images = await decodeImageFunction();
     final endTime = DateTime.now();
     final diffTime = endTime.difference(startTime).inMilliseconds;
     LogTool.log(

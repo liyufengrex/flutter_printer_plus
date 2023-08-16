@@ -4,8 +4,110 @@ flutter 端 【小票、标签】打印能力实现，直接将 flutter widget �
 
 支持传输方式：usb连接、网络连接。
 
-### 使用方式
+### 结合 `print_image_generate_tool` 的使用方式
+#### 1. 使用 `PrintImageGenerateWidget ` 作为根节点
+```dart
 
+MaterialApp(
+          onGenerateTitle: (context) => '打印测试',
+          home: Scaffold(
+            body: PrintImageGenerateWidget(
+              contentBuilder: (context) {
+                return const HomePage();
+              },
+              onPictureGenerated: _onPictureGenerated,
+            ),
+          ),
+        )
+```
+#### 2. 在 `_onPictureGenerated ` 方法中监听打印图层生成，并对接打印转码
+```dart
+//打印图层生成成功
+  Future<void> _onPictureGenerated(PicGenerateResult data) async {
+    final printTask = data.taskItem;
+
+    //指定的打印机
+    final printerInfo = printTask.params as PrinterInfo;
+    //打印票据类型（标签、小票）
+    final printTypeEnum = printTask.printTypeEnum;
+
+    final imageBytes = await data.convertUint8List(imageByteFormat:ImageByteFormat.rawRgba);
+    //也可以使用 ImageByteFormat.png
+    final argbWidth = data.imageWidth;
+    final argbHeight = data.imageHeight;
+    if (imageBytes == null) {
+      return;
+    }
+    //只要 imageBytes 不是使用 ImageByteFormat.rawRgba 格式转换的 unit8List
+    //argbWidthPx、argbHeightPx 不要传值，默认为空就行
+    var printData = await PrinterCommandTool.generatePrintCmd(
+      imgData: imageBytes,
+      printType: printTypeEnum,
+      argbWidthPx: argbWidth,
+      argbHeightPx: argbHeight,
+    );
+    if (printerInfo.isUsbPrinter) {
+      // usb 打印
+      final conn = UsbConn(printerInfo.usbDevice!);
+      conn.writeMultiBytes(printData, 1024 * 3);
+    } else if (printerInfo.isNetPrinter) {
+      // 网络 打印
+      final conn = NetConn(printerInfo.ip!);
+      conn.writeMultiBytes(printData);
+    }
+  }
+```
+#### 3. 发送一个任务将`flutter - widget`转打印图层，生成成功后会在上诉方法中获取到图层
+```dart
+///例如：将 ReceiptStyleWidget 转打印图层
+void doPrint() {
+  // 生成打印图层任务，指定任务类型为小票
+  PictureGeneratorProvider.instance.addPicGeneratorTask(
+    PicGenerateTask<PrinterInfo>(
+      tempWidget: ReceiptConstrainedBox(ReceiptStyleWidget()) as ATempWidget,
+      printTypeEnum: PrintTypeEnum.receipt,
+      params: printerInfo,
+    ),
+  );
+}
+
+/// 在 ReceiptStyleWidget 写小票样式
+class ReceiptStyleWidget extends StatefulWidget {
+  const ReceiptStyleWidget({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _TempReceiptWidgetState();
+}
+
+class _TempReceiptWidgetState extends State<ReceiptStyleWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return _homeBody();
+  }
+
+  Widget _homeBody() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '测试打印小票',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 34.w,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+}
+/// ReceiptConstrainedBox 是小票宽高的限制条件
+```
+
+
+### 单独使用 `flutter_printer_plus` 方式
 #### 1. 图像数据（Uint8List） 转 TSC 、ESC
 
 ###### 第一步：获取 Uint8List

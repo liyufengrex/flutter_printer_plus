@@ -8,18 +8,37 @@ import 'isolate/isolate_balance.dart';
 
 class TscPrinterService extends BasePrinterService {
   final Uint8List imgData;
+  final int? argbWidthPx; // imgData 类型为 ARGB Uint8List 时，需要传入 图像的像素宽度
+  final int? argbHeightPx; // imgData 类型为 ARGB Uint8List 时，需要传入 图像的像素高度
 
   TscPrinterService(
-    this.imgData,
-  );
+    this.imgData, {
+    this.argbWidthPx,
+    this.argbHeightPx,
+  });
+
+  Future decodeImageFunction() {
+    if (argbHeightPx != null && argbWidthPx != null) {
+      return ISOManager.loadBalanceFuture<img.Image, List<dynamic>>(
+        ImageDecodeTool.createImageWithARGB0,
+        [
+          imgData,
+          argbWidthPx,
+          argbHeightPx,
+        ],
+      );
+    } else {
+      return ISOManager.loadBalanceFuture<img.Image, Uint8List>(
+        ImageDecodeTool.createImageWithUni8List,
+        imgData,
+      );
+    }
+  }
 
   @override
   Future<List<List<int>>> getBytes() async {
     final cmd = <List<int>>[];
-    final image = await ISOManager.loadBalanceFuture<img.Image, Uint8List>(
-      ImageDecodeTool.cropImage,
-      imgData,
-    );
+    final image = await decodeImageFunction();
     final startTime = DateTime.now();
     final imageBytes = await ISOManager.loadBalanceFuture<List<int>, img.Image>(
       decodeBytes,
