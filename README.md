@@ -9,15 +9,15 @@ flutter 端 【小票、标签】打印能力实现，支持 USB、网口，支�
 ```dart
 
 MaterialApp(
-onGenerateTitle: (context) => '打印测试',
-home: Scaffold(
-body: PrintImageGenerateWidget(
-contentBuilder: (context) {
-return const HomePage();
-},
-onPictureGenerated: _onPictureGenerated,
-),
-),
+  onGenerateTitle: (context) => '打印测试',
+  home: Scaffold(
+    body: PrintImageGenerateWidget(
+        contentBuilder: (context) {
+          return const HomePage();
+        },
+        onPictureGenerated: _onPictureGenerated,
+    ),
+  ),
 )
 ```
 #### 2. 在 `_onPictureGenerated ` 方法中监听打印图层生成，并对接打印转码
