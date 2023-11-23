@@ -7,3 +7,4 @@ export 'src/service/esc_printer_service.dart';
 export 'src/service/tsc_printer_service.dart';
 export 'src/tools/printer_command_tool.dart';
 export 'package:image/image.dart';
+export 'src/flutter_printer_finder.dart';

@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   r_get_ip
+  windows_usb_printer
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

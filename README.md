@@ -1,61 +1,61 @@
 ## flutter_printer_plus
 
-flutter 端 【小票、标签】打印能力实现，直接将 flutter widget 转图像数据进行打印。
+flutter 端 【小票、标签】打印能力实现，支持 USB、网口，支持 Android、Windows 平台。
 
-支持传输方式：usb连接、网络连接。
+直接将 flutter widget 转图像数据进行打印，支持传输方式：usb连接(支持Android、Windows)、网络连接(各平台通用)。
 
 ### 结合 `print_image_generate_tool` 的使用方式
 #### 1. 使用 `PrintImageGenerateWidget ` 作为根节点
 ```dart
 
 MaterialApp(
-          onGenerateTitle: (context) => '打印测试',
-          home: Scaffold(
-            body: PrintImageGenerateWidget(
-              contentBuilder: (context) {
-                return const HomePage();
-              },
-              onPictureGenerated: _onPictureGenerated,
-            ),
-          ),
-        )
+onGenerateTitle: (context) => '打印测试',
+home: Scaffold(
+body: PrintImageGenerateWidget(
+contentBuilder: (context) {
+return const HomePage();
+},
+onPictureGenerated: _onPictureGenerated,
+),
+),
+)
 ```
 #### 2. 在 `_onPictureGenerated ` 方法中监听打印图层生成，并对接打印转码
 ```dart
 //打印图层生成成功
-  Future<void> _onPictureGenerated(PicGenerateResult data) async {
-    final printTask = data.taskItem;
+Future<void> _onPictureGenerated(PicGenerateResult data) async {
+  final printTask = data.taskItem;
 
-    //指定的打印机
-    final printerInfo = printTask.params as PrinterInfo;
-    //打印票据类型（标签、小票）
-    final printTypeEnum = printTask.printTypeEnum;
+  //指定的打印机
+  final printerInfo = printTask.params as PrinterInfo;
+  //打印票据类型（标签、小票）
+  final printTypeEnum = printTask.printTypeEnum;
 
-    final imageBytes = await data.convertUint8List(imageByteFormat:ImageByteFormat.rawRgba);
-    //也可以使用 ImageByteFormat.png
-    final argbWidth = data.imageWidth;
-    final argbHeight = data.imageHeight;
-    if (imageBytes == null) {
-      return;
-    }
-    //只要 imageBytes 不是使用 ImageByteFormat.rawRgba 格式转换的 unit8List
-    //argbWidthPx、argbHeightPx 不要传值，默认为空就行
-    var printData = await PrinterCommandTool.generatePrintCmd(
-      imgData: imageBytes,
-      printType: printTypeEnum,
-      argbWidthPx: argbWidth,
-      argbHeightPx: argbHeight,
-    );
-    if (printerInfo.isUsbPrinter) {
-      // usb 打印
-      final conn = UsbConn(printerInfo.usbDevice!);
-      conn.writeMultiBytes(printData, 1024 * 3);
-    } else if (printerInfo.isNetPrinter) {
-      // 网络 打印
-      final conn = NetConn(printerInfo.ip!);
-      conn.writeMultiBytes(printData);
-    }
+  final imageBytes = await data.convertUint8List(imageByteFormat:ImageByteFormat.rawRgba);
+  //也可以使用 ImageByteFormat.png
+  final argbWidth = data.imageWidth;
+  final argbHeight = data.imageHeight;
+  if (imageBytes == null) {
+    return;
   }
+  //只要 imageBytes 不是使用 ImageByteFormat.rawRgba 格式转换的 unit8List
+  //argbWidthPx、argbHeightPx 不要传值，默认为空就行
+  var printData = await PrinterCommandTool.generatePrintCmd(
+    imgData: imageBytes,
+    printType: printTypeEnum,
+    argbWidthPx: argbWidth,
+    argbHeightPx: argbHeight,
+  );
+  if (printerInfo.isUsbPrinter) {
+    // usb 打印
+    final conn = UsbConn(printerInfo.usbDevice!);
+    conn.writeMultiBytes(printData, 1024 * 3);
+  } else if (printerInfo.isNetPrinter) {
+    // 网络 打印
+    final conn = NetConn(printerInfo.ip!);
+    conn.writeMultiBytes(printData);
+  }
+}
 ```
 #### 3. 发送一个任务将`flutter - widget`转打印图层，生成成功后会在上诉方法中获取到图层
 ```dart
@@ -118,20 +118,32 @@ class _TempReceiptWidgetState extends State<ReceiptStyleWidget> {
 ```dart
 // 转 TSC 字节，imageBytes 类型为 Uint8List
 var printData = await PrinterCommandTool.generatePrintCmd(
-        imgData: imageBytes,
-        printType: PrintTypeEnum.label,
-      );
+imgData: imageBytes,
+printType: PrintTypeEnum.label,
+);
 ```
 ```dart
 // 转 ESC 字节，imageBytes 类型为 Uint8List
 var printData = await PrinterCommandTool.generatePrintCmd(
-        imgData: imageBytes,
-        printType: PrintTypeEnum.receipt,
-      );
+imgData: imageBytes,
+printType: PrintTypeEnum.receipt,
+);
 ```
-#### 2. 发送打印字节
+#### 2. 获取可用的打印机
+###### 获取USB打印机列表
+搜索 已连接(Android)/已安装驱动的(Windows) USB 打印机
+```
+// 返回 Future<List<UsbDeviceInfo>>
+        FlutterPrinterFinder.queryUsbPrinter()  
+```
+###### 获取网络打印机列表
+```
+// 返回 Future<List<String>>
+        FlutterPrinterFinder.queryPrinterIp()  
+```
+
+#### 3. 发送打印字节
 ###### USB 传输 （USB打印机）
-通过 `android_usb_printer` 库，获取当前已连接的打印机列表，列表内每一个元素类型为 usbDevice。
 ```
 // usb 打印
         final conn = UsbConn(usbDevice);

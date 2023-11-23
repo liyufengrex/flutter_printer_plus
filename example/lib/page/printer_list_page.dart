@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 // ignore: depend_on_referenced_packages
 import 'package:android_usb_printer/android_usb_printer.dart';
+import 'package:flutter_printer_plus/flutter_printer_plus.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:r_get_ip/r_get_ip.dart';
 import '../module/printer_info.dart';
@@ -23,37 +24,16 @@ class PrinterListPage extends StatefulWidget {
 class _PrinterListPageState extends State<PrinterListPage> {
   //查询本地USB打印机列表
   Future<List<PrinterInfo>> queryLocalUSBPrinter() {
-    return AndroidUsbPrinterPlatform.instance.queryLocalUsbDevice().then(
-          (value) => value
-              .map(
-                (e) => PrinterInfo.fromUsbDevice(e),
-              )
-              .toList(),
-        );
+    return FlutterPrinterFinder.queryUsbPrinter().then(
+      (value) => value.map((e) => PrinterInfo.fromUsbDevice(e)).toList(),
+    );
   }
 
   //搜索网络打印机
   Future<List<PrinterInfo>> queryNetPrinters() async {
-    final completer = Completer<List<PrinterInfo>>();
-    final netPrinters = <PrinterInfo>[];
-    final localIp = await RGetIp.internalIP ?? '';
-    final subnet = localIp.substring(0, localIp.lastIndexOf('.'));
-    const port = 9100;
-    final stream = PingDiscoverTool.discover(
-      subnet,
-      port,
-      timeout: const Duration(milliseconds: 2000),
+    return FlutterPrinterFinder.queryPrinterIp().then(
+      (value) => value.map((e) => PrinterInfo(ip: e)).toList(),
     );
-    List<String> selectIpArr = <String>[];
-    stream.listen((NetworkAddress addr) {
-      if (addr.exists) {
-        selectIpArr.add(addr.ip);
-      }
-    }).onDone(() {
-      netPrinters.addAll(selectIpArr.map((e) => PrinterInfo(ip: e)).toList());
-      completer.complete(netPrinters);
-    });
-    return completer.future;
   }
 
   Future<List<PrinterInfo>> queryPrinter() {

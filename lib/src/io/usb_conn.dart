@@ -1,10 +1,11 @@
 import 'dart:io';
 
 import 'package:android_usb_printer/android_usb_printer.dart';
-
+import 'package:windows_usb_printer/windows_usb_printer.dart';
 import 'base_conn.dart';
 
-class UsbConn extends PrintBaseConn{
+/// android 平台使用的 usb 传输
+class UsbConn extends PrintBaseConn {
   final UsbDeviceInfo usbDevice;
 
   UsbConn(this.usbDevice);
@@ -35,6 +36,8 @@ class UsbConn extends PrintBaseConn{
         data,
         singleWriteLimit,
       );
+    } if (Platform.isWindows) {
+      return writeBytesWithWindows(data);
     } else {
       throw Exception('The platform is not supported temporarily');
     }
@@ -51,4 +54,10 @@ class UsbConn extends PrintBaseConn{
       singleLimit: singleWriteLimit,
     );
   }
+
+  // windows 平台写入
+  Future<int> writeBytesWithWindows(List<int> bytes,) {
+    return WindowsUsbPrinterProvider.usbWrite(usbDevice.productName, bytes);
+  }
+
 }
