@@ -4,7 +4,7 @@ flutter 端 【小票、标签】打印能力实现，支持 USB、网口，支�
 
 > 结合 `print_image_generate_tool` 库可直接使用 flutter-widget 布局进行打印票据的样式开发，widget 怎么写，打印出来的样式就是什么。
 
-##### 使用方式一：单独使用 `flutter_printer_plus` 方式
+#### 使用方式一：单独使用 `flutter_printer_plus` 方式
 ###### 1. 图像数据（Uint8List） 转 TSC 、ESC
 
 ###### 第一步：获取 Uint8List
@@ -57,7 +57,7 @@ conn.writeMultiBytes(printData);
 ```
 
 
-###### 使用方式二：结合 `print_image_generate_tool` 的使用方式
+#### 使用方式二：结合 `print_image_generate_tool` 的使用方式
 直接将 flutter widget 转图像数据进行打印
 
 第一步：使用 `PrintImageGenerateWidget ` 作为根节点
