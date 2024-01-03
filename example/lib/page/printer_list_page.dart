@@ -4,12 +4,9 @@ import 'package:example/page/printer_content_page.dart';
 import 'package:flutter/material.dart';
 
 // ignore: depend_on_referenced_packages
-import 'package:android_usb_printer/android_usb_printer.dart';
 import 'package:flutter_printer_plus/flutter_printer_plus.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:r_get_ip/r_get_ip.dart';
 import '../module/printer_info.dart';
-import '../tools/ping_discover.dart';
 import '../widget/loading_widget.dart';
 
 class PrinterListPage extends StatefulWidget {

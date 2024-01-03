@@ -131,7 +131,11 @@ class LabelStyleWidget extends StatelessWidget {
           _title(),
           _subTitle(),
           const SizedBox(height: 16),
-          const Divider(color: Color(0xff242524), height: 10, thickness: 3),
+          Divider(
+            color: const Color(0xff242524),
+            height: 10.w,
+            thickness: 3.w,
+          ),
           const SizedBox(height: 8),
           _productName(),
           Expanded(
@@ -139,9 +143,13 @@ class LabelStyleWidget extends StatelessWidget {
           ),
           _tip(),
           const SizedBox(height: 8),
-          const Padding(
-            padding: EdgeInsets.only(right: 98),
-            child: Divider(color: Color(0xff242524), height: 10, thickness: 3),
+           Padding(
+            padding: const EdgeInsets.only(right: 98),
+            child: Divider(
+              color: const Color(0xff242524),
+              height: 10.w,
+              thickness: 3.w,
+            ),
           ),
           const SizedBox(height: 16),
           SizedBox(
