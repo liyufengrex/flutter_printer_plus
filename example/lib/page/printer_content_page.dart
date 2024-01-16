@@ -23,6 +23,8 @@ class PrinterContentWidget extends StatelessWidget {
   List<FuncEnum> get funcs => [
         FuncEnum.previewReceipt,
         FuncEnum.previewLabel,
+        FuncEnum.printReceipt,
+        FuncEnum.printLabel,
       ];
 
   Widget _title(BuildContext context) {
