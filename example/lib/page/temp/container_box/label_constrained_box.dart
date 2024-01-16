@@ -8,14 +8,22 @@ import 'package:print_image_generate_tool/print_image_generate_tool.dart';
 class LabelConstrainedBox extends StatelessWidget with ATempWidget {
   final Widget child;
 
-  const LabelConstrainedBox(this.child, {Key? key}) : super(key: key);
+  // 传入标签的限制宽度、高度(单位像素)
+  final int pageWidth, pageHeight;
+
+  const LabelConstrainedBox(
+    this.child, {
+    Key? key,
+    required this.pageWidth,
+    required this.pageHeight,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      width: 360.w,
-      height: 560.w,
+      width: pageWidth.w,
+      height: pageHeight.w,
       child: ColorFiltered(
         colorFilter: const ColorFilter.mode(
           Colors.black,
@@ -27,10 +35,10 @@ class LabelConstrainedBox extends StatelessWidget with ATempWidget {
   }
 
   @override
-  int get pixelPagerWidth => 360;
+  int get pixelPagerWidth => pageWidth;
 
   @override
-  int get pixelPagerHeight => 560;
+  int get pixelPagerHeight => pageHeight;
 
   @override
   double get pixelRatio => 1 / 1.w;

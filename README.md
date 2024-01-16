@@ -120,7 +120,10 @@ void doPrint() {
   // 生成打印图层任务，指定任务类型为小票
   PictureGeneratorProvider.instance.addPicGeneratorTask(
     PicGenerateTask<PrinterInfo>(
-      tempWidget: ReceiptConstrainedBox(ReceiptStyleWidget()) as ATempWidget, //ReceiptConstrainedBox 封装了小票宽高的限制条件
+      tempWidget: const ReceiptConstrainedBox(
+        ReceiptStyleWidget(),
+        pageWidth: 550, //表明最终生成的图像的宽为 550px
+      ), //ReceiptConstrainedBox 封装了小票宽高的限制条件
       printTypeEnum: PrintTypeEnum.receipt,
       params: printerInfo, //params是一个透传值，可以是任意类型，example中 params 携带的是打印机数据，在 _onPictureGenerated 中跟随生成的打印图层可被获取到
     ),

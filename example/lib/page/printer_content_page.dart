@@ -3,7 +3,13 @@ import 'package:example/page/temp/receipt_temp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+// ignore: depend_on_referenced_packages
+import 'package:print_image_generate_tool/print_image_generate_tool.dart';
 import '../module/printer_info.dart';
+import 'temp/container_box/label_constrained_box.dart';
+import 'temp/container_box/receipt_constrained_box.dart';
+import 'temp/demo/label_temp_demo.dart';
+import 'temp/demo/receipt_temp_demo.dart';
 
 ///打印机详情页
 class PrinterContentWidget extends StatelessWidget {
@@ -15,8 +21,8 @@ class PrinterContentWidget extends StatelessWidget {
   }) : super(key: key);
 
   List<FuncEnum> get funcs => [
-        FuncEnum.printReceipt,
-        FuncEnum.printLabel,
+        FuncEnum.previewReceipt,
+        FuncEnum.previewLabel,
       ];
 
   Widget _title(BuildContext context) {
@@ -57,6 +63,8 @@ class PrinterContentWidget extends StatelessWidget {
 }
 
 enum FuncEnum {
+  previewReceipt,
+  previewLabel,
   printReceipt,
   printLabel,
 }
@@ -64,25 +72,78 @@ enum FuncEnum {
 extension ExFuncEnum on FuncEnum {
   String get label {
     switch (this) {
-      case FuncEnum.printReceipt:
+      case FuncEnum.previewReceipt:
         return '预览打印小票';
-      case FuncEnum.printLabel:
+      case FuncEnum.previewLabel:
         return '预览打印标签';
+      case FuncEnum.printReceipt:
+        return '打印小票';
+      case FuncEnum.printLabel:
+        return '打印标签';
     }
   }
 
   ///执行对应的命令行
-  void performCommand(BuildContext context, PrinterInfo printerInfo) {
+  void performCommand(
+    BuildContext context,
+    PrinterInfo printerInfo,
+  ) {
     switch (this) {
+      case FuncEnum.previewReceipt:
+        // 预览小票
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return ReceiptTempWidget(
+                printerInfo,
+                receiptWidth: 550,
+              );
+            },
+          ),
+        );
+        break;
+      case FuncEnum.previewLabel:
+        // 预览标签
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return LabelTempWidget(
+                printerInfo,
+                labelWidth: 360,
+                labelHeight: 560,
+              );
+            },
+          ),
+        );
+        break;
       case FuncEnum.printReceipt:
-        Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return ReceiptTempWidget(printerInfo);
-        }));
+        // 直接打印小票
+        PictureGeneratorProvider.instance.addPicGeneratorTask(
+          PicGenerateTask<PrinterInfo>(
+            tempWidget: const ReceiptConstrainedBox(
+              ReceiptStyleWidget(),
+              pageWidth: 550,
+            ),
+            printTypeEnum: PrintTypeEnum.receipt,
+            params: printerInfo,
+          ),
+        );
         break;
       case FuncEnum.printLabel:
-        Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return LabelTempWidget(printerInfo);
-        }));
+        // 直接打印标签
+        PictureGeneratorProvider.instance.addPicGeneratorTask(
+          PicGenerateTask<PrinterInfo>(
+            tempWidget: const LabelConstrainedBox(
+              LabelStyleWidget(),
+              pageWidth: 360,
+              pageHeight: 560,
+            ),
+            printTypeEnum: PrintTypeEnum.label,
+            params: printerInfo,
+          ),
+        );
         break;
     }
   }

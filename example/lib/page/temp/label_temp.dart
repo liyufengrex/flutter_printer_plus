@@ -11,8 +11,14 @@ import 'demo/label_temp_demo.dart';
 // 预览标签
 class LabelTempWidget extends BaseGenerateWidget {
   final PrinterInfo printerInfo;
+  final int labelWidth, labelHeight;
 
-  const LabelTempWidget(this.printerInfo, {Key? key}) : super(key: key);
+  const LabelTempWidget(
+    this.printerInfo, {
+    Key? key,
+    required this.labelWidth,
+    required this.labelHeight,
+  }) : super(key: key);
 
   @override
   void doPrint() {
@@ -28,8 +34,10 @@ class LabelTempWidget extends BaseGenerateWidget {
 
   @override
   Widget child() {
-    return const LabelConstrainedBox(
-      LabelStyleWidget(),
+    return LabelConstrainedBox(
+      const LabelStyleWidget(),
+      pageWidth: labelWidth,
+      pageHeight: labelHeight,
     );
   }
 }

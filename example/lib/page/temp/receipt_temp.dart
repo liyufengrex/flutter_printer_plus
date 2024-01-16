@@ -10,8 +10,13 @@ import 'demo/receipt_temp_demo.dart';
 //预览小票
 class ReceiptTempWidget extends BaseGenerateWidget {
   final PrinterInfo printerInfo;
+  final int receiptWidth;
 
-  const ReceiptTempWidget(this.printerInfo, {Key? key}) : super(key: key);
+  const ReceiptTempWidget(
+    this.printerInfo, {
+    Key? key,
+    required this.receiptWidth,
+  }) : super(key: key);
 
   @override
   void doPrint() {
@@ -27,6 +32,9 @@ class ReceiptTempWidget extends BaseGenerateWidget {
 
   @override
   Widget child() {
-    return const ReceiptConstrainedBox(ReceiptStyleWidget());
+    return  ReceiptConstrainedBox(
+      const ReceiptStyleWidget(),
+      pageWidth: receiptWidth,
+    );
   }
 }

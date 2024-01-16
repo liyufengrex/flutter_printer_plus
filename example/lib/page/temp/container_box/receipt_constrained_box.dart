@@ -8,13 +8,20 @@ import 'package:print_image_generate_tool/print_image_generate_tool.dart';
 class ReceiptConstrainedBox extends StatelessWidget with ATempWidget {
   final Widget child;
 
-  const ReceiptConstrainedBox(this.child, {Key? key}) : super(key: key);
+  // 传入小票的限制宽度(单位像素)
+  final int pageWidth;
+
+  const ReceiptConstrainedBox(
+    this.child, {
+    Key? key,
+    required this.pageWidth,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      width: 550.w,
+      width: pageWidth.w,
       child: ColorFiltered(
         colorFilter: const ColorFilter.mode(
           Colors.black,
@@ -26,7 +33,7 @@ class ReceiptConstrainedBox extends StatelessWidget with ATempWidget {
   }
 
   @override
-  int get pixelPagerWidth => 550;
+  int get pixelPagerWidth => pageWidth;
 
   @override
   double get pixelRatio => 1 / 1.w;
