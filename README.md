@@ -2,6 +2,16 @@
 
 flutter 端 【小票、标签】打印能力实现，支持 USB、网口，支持 Android、Windows 平台。(无厂家SDK嵌入)
 
+### 特点
+![image](https://github.com/liyufengrex/flutter_printer_plus/assets/48038749/8d9423a4-2af4-40ba-97bf-5e53f612c3d6)
++ 票据样式: 拒绝硬编码，直接使用 flutter-widget 进行样式开发，更加直观灵活
++ 打印指令集: 不嵌入厂商的打印SDK，适配一码多用，无后续接入开发消耗
++ 传输方式: 指令集传输方式可扩展，底层代码无需变动
+<br/>
+
+### 整体方案流程
+![image](https://github.com/liyufengrex/flutter_printer_plus/assets/48038749/0f177bf1-0935-4955-b4c0-a6703a6a8d88)
+<br/>
 > 结合 `print_image_generate_tool` 库可直接使用 flutter-widget 布局进行打印票据的样式开发，widget 怎么写，打印出来的样式就是什么。
 
 #### 使用方式一：单独使用 `flutter_printer_plus` 方式
